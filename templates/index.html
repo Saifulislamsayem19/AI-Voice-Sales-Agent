@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Sales Agent</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #28a745;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        }
+        
+        .conversation-container {
+            height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.agent {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.customer {
+            background: #e9ecef;
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-header {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .message-content {
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+        
+        .audio-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .recording-indicator {
+            width: 12px;
+            height: 12px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-ended {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: block;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .call-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .call-info p {
+            margin-bottom: 8px;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .silence-timer {
+            background: #ff9800;
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 5px;
+            transition: width 0.1s linear;
+        }
+        
+        .permission-info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-headset"></i> Voice Sales Agent</h1>
+            <p>AI-Powered Sales Conversations for TechEdu Academy</p>
+        </header>
+
+        <div class="card-grid">
+            <!-- Call Setup -->
+            <div class="card">
+                <h2><i class="fas fa-phone"></i> Start New Call</h2>
+                <form id="callForm">
+                    <div class="form-group">
+                        <label for="customerName">Customer Name</label>
+                        <input type="text" id="customerName" name="customerName" required placeholder="Enter customer name">
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="Enter phone number">
+                    </div>
+                    <button type="submit" class="btn" id="startCallBtn">
+                        <i class="fas fa-phone"></i> Start Call
+                    </button>
+                    <div class="permission-info" id="permissionInfo">
+                        <i class="fas fa-info-circle"></i> Microphone permission will be requested when you start recording.
+                    </div>
+                </form>
+            </div>
+
+            <!-- Call Status -->
+            <div class="card">
+                <h2><i class="fas fa-info-circle"></i> Call Status</h2>
+                <div id="callStatus">
+                    <p>No active call</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number" id="totalMessages">0</span>
+                        <div class="stat-label">Messages</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="callDuration">0:00</span>
+                        <div class="stat-label">Duration</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversation Interface -->
+        <div class="card hidden" id="conversationCard">
+            <h2><i class="fas fa-comments"></i> Live Conversation</h2>
+            
+            <div class="call-info" id="callInfo">
+                <!-- Call information will be displayed here -->
+            </div>
+            
+            <div class="conversation-container" id="conversationContainer">
+                <!-- Messages will be added here -->
+            </div>
+            
+            <!-- Text Input -->
+            <div class="form-group">
+                <label for="customerMessage">Customer Response</label>
+                <textarea id="customerMessage" placeholder="Type customer response or record audio..." rows="2" disabled></textarea>
+                <div class="silence-timer hidden" id="silenceTimer"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="sendMessageBtn" disabled>
+                    <i class="fas fa-paper-plane"></i> Send Message
+                </button>
+                <button class="btn btn-secondary" id="getTTSBtn" disabled>
+                    <i class="fas fa-volume-up"></i> Play Response
+                </button>
+                <button class="btn btn-danger" id="endCallBtn" disabled>
+                    <i class="fas fa-phone-slash"></i> End Call
+                </button>
+            </div>
+
+            <!-- Audio Controls -->
+            <div class="audio-controls">
+                <button class="btn btn-secondary" id="recordBtn">
+                    <i class="fas fa-microphone"></i> Record Audio
+                </button>
+                <div class="recording-indicator hidden" id="recordingIndicator"></div>
+                <span id="recordingStatus">Ready to record</span>
+            </div>
+            
+            <!-- Audio Player -->
+            <audio id="audioPlayer" controls class="hidden"></audio>
+        </div>
+    </div>
+
+    <script>
+        class VoiceSalesAgent {
+            constructor() {
+                this.apiBaseUrl = 'http://localhost:8000';
+                this.currentCallId = null;
+                this.customerName = null;
+                this.isRecording = false;
+                this.callStartTime = null;
+                this.durationInterval = null;
+                this.messageCount = 0;
+                this.recognition = null;
+                this.silenceTimer = null;
+                this.silenceTimeout = 2000; 
+                this.silenceTimerProgress = null;
+                this.hasMicrophonePermission = false;
+                this.permissionDenied = false;
+                
+                this.initializeEventListeners();
+                this.initSpeechRecognition();
+            }
+
+            initializeEventListeners() {
+                // Form submission
+                document.getElementById('callForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.startCall();
+                });
+
+                // Message sending
+                document.getElementById('sendMessageBtn').addEventListener('click', () => {
+                    this.sendMessage();
+                });
+
+                document.getElementById('customerMessage').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                // Audio controls
+                document.getElementById('recordBtn').addEventListener('click', () => {
+                    this.toggleRecording();
+                });
+
+                // End call
+                document.getElementById('endCallBtn').addEventListener('click', () => {
+                    this.endCall();
+                });
+
+                // Play TTS button
+                document.getElementById('getTTSBtn').addEventListener('click', () => {
+                    const lastAgentMsg = this.getLastAgentMessage();
+                    if (lastAgentMsg) {
+                        this.playTTS(lastAgentMsg);
+                    }
+                });
+            }
+
+            async requestMicrophonePermission() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(track => track.stop());
+                    this.hasMicrophonePermission = true;
+                    this.permissionDenied = false;
+                    document.getElementById('permissionInfo').innerHTML = 
+                        '<i class="fas fa-check-circle"></i> Microphone permission granted. You can now record audio.';
+                    return true;
+                } catch (error) {
+                    console.warn('Microphone access denied:', error);
+                    this.permissionDenied = true;
+                    this.hasMicrophonePermission = false;
+                    this.showError('Microphone access is required for audio recording.');
+                    return false;
+                }
+            }
+
+            initSpeechRecognition() {
+                // Check if browser supports speech recognition
+                if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'en-US';
+
+                    this.recognition.onstart = () => {
+                        this.isRecording = true;
+                        document.getElementById('recordBtn').innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
+                        document.getElementById('recordingIndicator').classList.remove('hidden');
+                        document.getElementById('recordingStatus').textContent = 'Listening...';
+                        document.getElementById('silenceTimer').classList.remove('hidden');
+                    };
+
+                    this.recognition.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            if (event.results[i].isFinal) {
+                                transcript += event.results[i][0].transcript;
+                            } else {
+                                transcript = event.results[i][0].transcript;
+                            }
+                        }
+                        
+                        // Update input field with transcription
+                        document.getElementById('customerMessage').value = transcript;
+                        
+                        // Reset silence timer
+                        this.resetSilenceTimer();
+                    };
+
+                    this.recognition.onerror = (event) => {
+                        console.error('Speech recognition error:', event.error);
+                        this.stopRecording();
+                    };
+
+                    this.recognition.onend = () => {
+                        this.stopRecording();
+                    };
+                } else {
+                    this.showError('Speech recognition is not supported in this browser.');
+                    document.getElementById('recordBtn').disabled = true;
+                    document.getElementById('permissionInfo').innerHTML = 
+                        '<i class="fas fa-exclamation-triangle"></i> Your browser does not support speech recognition.';
+                }
+            }
+
+            resetSilenceTimer() {
+                // Clear existing timer
+                if (this.silenceTimer) {
+                    clearTimeout(this.silenceTimer);
+                }
+                if (this.silenceTimerProgress) {
+                    clearInterval(this.silenceTimerProgress);
+                }
+                
+                // Reset progress bar
+                const timerBar = document.getElementById('silenceTimer');
+                timerBar.style.width = '0%';
+                
+                // Start new silence timer
+                let timePassed = 0;
+                const interval = 50; // update every 50ms
+                
+                this.silenceTimerProgress = setInterval(() => {
+                    timePassed += interval;
+                    const progress = (timePassed / this.silenceTimeout) * 100;
+                    timerBar.style.width = `${Math.min(progress, 100)}%`;
+                }, interval);
+                
+                this.silenceTimer = setTimeout(() => {
+                    this.stopRecording();
+                    this.sendMessage();
+                }, this.silenceTimeout);
+            }
+
+            async startCall() {
+                const customerName = document.getElementById('customerName').value;
+                const phoneNumber = document.getElementById('phoneNumber').value;
+
+                if (!customerName || !phoneNumber) {
+                    this.showError('Please fill in all fields');
+                    return;
+                }
+
+                const startBtn = document.getElementById('startCallBtn');
+                startBtn.disabled = true;
+                startBtn.innerHTML = '<span class="loading"></span> Starting Call...';
+                this.customerName = customerName;
+
+                try {
+                    const response = await fetch(`${this.apiBaseUrl}/start-call`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            customer_name: customerName,
+                            phone_number: phoneNumber
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    this.currentCallId = data.call_id;
+                    this.callStartTime = new Date();
+                    this.messageCount = 0; // Reset message count
+
+                    // Update UI
+                    this.showConversationInterface();
+                    this.addMessage('agent', data.first_message);
+                    
+                    // FIX: Play audio for the first message
+                    this.playTTS(data.first_message);
+                    
+                    this.updateCallStatus('Active', customerName);
+                    this.startCallDurationTimer();
+
+                    // Update call info
+                    document.getElementById('callInfo').innerHTML = `
+                        <p><strong>Customer:</strong> ${customerName}</p>
+                        <p><strong>Phone:</strong> ${phoneNumber}</p>
+                        <p><strong>Call ID:</strong> ${data.call_id}</p>
+                    `;
+
+                    this.showSuccess('Call started successfully!');
+
+                } catch (error) {
+                    console.error('Error starting call:', error);
+                    this.showError('Failed to start call. Please check if the backend server is running.');
+                } finally {
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '<i class="fas fa-phone"></i> Start Call';
+                }
+            }
+
+            async toggleRecording() {
+                // Check if we need to request permission first
+                if (!this.hasMicrophonePermission && !this.permissionDenied) {
+                    const granted = await this.requestMicrophonePermission();
+                    if (!granted) {
+                        return;
+                    }
+                }
+                
+                // If permission is denied, show error and return
+                if (this.permissionDenied || !this.hasMicrophonePermission) {
+                    this.showError('Microphone permission denied. Please enable it in your browser settings and refresh the page.');
+                    return;
+                }
+                
+                // Toggle recording state
+                if (!this.isRecording) {
+                    this.startRecording();
+                } else {
+                    this.stopRecording();
+                }
+            }
+
+            startRecording() {
+                if (!this.recognition) {
+                    this.showError('Speech recognition not available');
+                    return;
+                }
+                
+                // Stop any current audio playback
+                this.stopAudio();
+                
+                // Clear any existing silence timer
+                if (this.silenceTimer) {
+                    clearTimeout(this.silenceTimer);
+                }
+                if (this.silenceTimerProgress) {
+                    clearInterval(this.silenceTimerProgress);
+                }
+                
+                // Clear input field
+                document.getElementById('customerMessage').value = '';
+                
+                try {
+                    this.recognition.start();
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    this.showError('Failed to start recording');
+                }
+            }
+
+            stopRecording() {
+                if (this.recognition && this.isRecording) {
+                    this.recognition.stop();
+                    this.isRecording = false;
+                    document.getElementById('recordBtn').innerHTML = '<i class="fas fa-microphone"></i> Record Audio';
+                    document.getElementById('recordingIndicator').classList.add('hidden');
+                    document.getElementById('recordingStatus').textContent = 'Ready to record';
+                    document.getElementById('silenceTimer').classList.add('hidden');
+                }
+                
+                // Clear any existing silence timer
+                if (this.silenceTimer) {
+                    clearTimeout(this.silenceTimer);
+                    this.silenceTimer = null;
+                }
+                if (this.silenceTimerProgress) {
+                    clearInterval(this.silenceTimerProgress);
+                    this.silenceTimerProgress = null;
+                }
+            }
+
+            async sendMessage() {
+                const messageInput = document.getElementById('customerMessage');
+                const message = messageInput.value.trim();
+
+                if (!message || !this.currentCallId) return;
+
+                const sendBtn = document.getElementById('sendMessageBtn');
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<span class="loading"></span> Sending...';
+
+                try {
+                    // Add customer message to conversation
+                    this.addMessage('customer', message);
+                    messageInput.value = '';
+
+                    const response = await fetch(`${this.apiBaseUrl}/respond/${this.currentCallId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Add agent response
+                    this.addMessage('agent', data.reply);
+
+                    // Auto-play agent response
+                    this.playTTS(data.reply);
+
+                    if (data.should_end_call) {
+                        this.endCall(true);
+                    }
+
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    this.showError('Failed to send message');
+                } finally {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+                }
+            }
+
+            async playTTS(text) {
+                try {
+                    const response = await fetch(`${this.apiBaseUrl}/tts`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Play audio
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    audioPlayer.src = `data:audio/mp3;base64,${data.audio}`;
+                    audioPlayer.classList.remove('hidden');
+                    audioPlayer.play().catch(e => console.error('Audio playback error:', e));
+
+                } catch (error) {
+                    console.error('Error generating TTS:', error);
+                    this.showError('Failed to generate speech');
+                }
+            }
+
+            stopAudio() {
+                const audioPlayer = document.getElementById('audioPlayer');
+                if (audioPlayer.src) {
+                    audioPlayer.pause();
+                    audioPlayer.currentTime = 0;
+                    audioPlayer.classList.add('hidden');
+                }
+            }
+
+            addMessage(speaker, message) {
+                const container = document.getElementById('conversationContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${speaker}`;
+
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <span>${speaker === 'agent' ? 'Sales Agent' : 'Customer'}</span>
+                        <span>${timeString}</span>
+                    </div>
+                    <div class="message-content">${message}</div>
+                `;
+
+                container.appendChild(messageDiv);
+                container.scrollTop = container.scrollHeight;
+
+                // Update message count
+                this.messageCount++;
+                document.getElementById('totalMessages').textContent = this.messageCount;
+            }
+
+            getLastAgentMessage() {
+                const messages = document.querySelectorAll('.message.agent');
+                if (messages.length > 0) {
+                    return messages[messages.length - 1].querySelector('.message-content').textContent;
+                }
+                return null;
+            }
+
+            showConversationInterface() {
+                document.getElementById('conversationCard').classList.remove('hidden');
+                document.getElementById('customerMessage').disabled = false;
+                document.getElementById('sendMessageBtn').disabled = false;
+                document.getElementById('endCallBtn').disabled = false;
+                document.getElementById('recordBtn').disabled = false;
+                document.getElementById('getTTSBtn').disabled = false;
+            }
+
+            updateCallStatus(status, customerName = '') {
+                const statusDiv = document.getElementById('callStatus');
+                const statusClass = status === 'Active' ? 'status-active' : 'status-ended';
+                
+                statusDiv.innerHTML = `
+                    <p><strong>Status:</strong> <span class="status-indicator ${statusClass}">${status}</span></p>
+                    ${customerName ? `<p><strong>Customer:</strong> ${customerName}</p>` : ''}
+                    ${this.currentCallId ? `<p><strong>Call ID:</strong> ${this.currentCallId}</p>` : ''}
+                `;
+            }
+
+            startCallDurationTimer() {
+                // Clear any existing interval
+                if (this.durationInterval) {
+                    clearInterval(this.durationInterval);
+                }
+                
+                this.durationInterval = setInterval(() => {
+                    if (this.callStartTime) {
+                        const duration = Math.floor((new Date() - this.callStartTime) / 1000);
+                        const minutes = Math.floor(duration / 60);
+                        const seconds = duration % 60;
+                        document.getElementById('callDuration').textContent = 
+                            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }, 1000);
+            }
+
+            endCall(automatic = false) {
+                if (this.durationInterval) {
+                    clearInterval(this.durationInterval);
+                }
+
+                this.stopRecording();
+                this.stopAudio();
+                this.updateCallStatus('Ended');
+                
+                // Disable controls
+                document.getElementById('customerMessage').disabled = true;
+                document.getElementById('sendMessageBtn').disabled = true;
+                document.getElementById('endCallBtn').disabled = true;
+                document.getElementById('recordBtn').disabled = true;
+                document.getElementById('getTTSBtn').disabled = true;
+
+                if (!automatic) {
+                    this.addMessage('system', 'Call ended by user');
+                }
+
+                this.showSuccess('Call ended successfully');
+            }
+
+            showError(message) {
+                this.showNotification(message, 'error');
+            }
+
+            showSuccess(message) {
+                this.showNotification(message, 'success');
+            }
+
+            showNotification(message, type) {
+                // Remove existing notifications
+                const existing = document.querySelector('.error-message, .success-message');
+                if (existing) {
+                    existing.remove();
+                }
+
+                const notification = document.createElement('div');
+                notification.className = type === 'error' ? 'error-message' : 'success-message';
+                notification.textContent = message;
+
+                document.querySelector('.container').insertBefore(
+                    notification, 
+                    document.querySelector('.card-grid')
+                );
+
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new VoiceSalesAgent();
+        });
+    </script>
+</body>
+</html>
