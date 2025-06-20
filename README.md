@@ -1,229 +1,209 @@
-# AI Voice Sales Agent
+# Voice Sales Agent with LangGraph
 
-A sophisticated AI-powered voice sales agent built with FastAPI and LangGraph that conducts intelligent sales conversations for educational course offerings. The agent uses OpenAI's GPT models and advanced conversation flow management to provide personalized sales experiences.
+A sophisticated AI-powered sales agent built with FastAPI and LangGraph that conducts natural voice conversations for TechEdu Academy's AI and Data Science training programs. The system combines speech recognition, intelligent conversation flow, and text-to-speech capabilities to create engaging sales interactions.
 
-![image](https://github.com/user-attachments/assets/ed27ac44-a91b-404f-9a91-0b8c796d57b3)
+![image](https://github.com/user-attachments/assets/e93e1a7e-764a-47e5-a48c-131b00602eda)
 
 
 ## 🚀 Features
 
-- **Intelligent Conversation Flow**: Uses LangGraph to manage complex sales conversation stages
-- **Voice Integration**: Built-in speech-to-text (Whisper) and text-to-speech capabilities
-- **Adaptive Sales Process**: Dynamically adjusts conversation based on customer responses and sentiment
-- **Customer Profiling**: Builds detailed customer profiles during conversations
-- **Multi-stage Sales Pipeline**: Handles introduction, qualification, pitching, objection handling, and closing
-- **Real-time Sentiment Analysis**: Analyzes customer sentiment to guide conversation flow
-- **Course Recommendation Engine**: Recommends appropriate courses based on customer profiles
+### Core Capabilities
+- **Intelligent Conversation Flow**: Multi-stage sales process management using LangGraph
+- **Real-time Voice Processing**: Audio transcription using OpenAI Whisper
+- **Dual TTS Support**: HuggingFace SpeechT5 with OpenAI TTS fallback
+- **Customer Profiling**: Dynamic customer qualification and needs assessment
+- **Objection Handling**: AI-powered objection detection and response
+- **Sentiment Analysis**: Real-time conversation sentiment tracking
+
+### Sales Process Stages
+1. **Introduction** - Warm greeting and company introduction
+2. **Qualification** - Customer needs assessment and profiling
+3. **Pitch** - Personalized course recommendations
+4. **Objection Handling** - Address customer concerns
+5. **Closing** - Conversion attempts based on customer sentiment
+6. **Follow-up** - Professional call conclusion
+
+### Technical Features
+- **RESTful API** with FastAPI framework
+- **Async Processing** for optimal performance
+- **Session Management** for multiple concurrent calls
+- **Error Handling** with graceful fallbacks
+- **CORS Support** for web integration
 
 ## 🏗️ Architecture
 
-The application uses LangGraph to create a state-driven conversation flow with the following stages:
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   FastAPI       │    │   LangGraph      │    │   AI Services   │
+│   Web Server    │◄──►│   Workflow       │◄──►│   OpenAI GPT    │
+│                 │    │   Engine         │    │   Whisper API   │
+└─────────────────┘    └──────────────────┘    │   HuggingFace   │
+         │                       │              │   SpeechT5      │
+         │                       │              └─────────────────┘
+         ▼                       ▼
+┌─────────────────┐    ┌──────────────────┐
+│   Session       │    │   Customer       │
+│   Management    │    │   Profiling      │
+└─────────────────┘    └──────────────────┘
+```
 
-1. **Introduction** - Initial greeting and rapport building
-2. **Qualification** - Gathering customer information and needs
-3. **Pitch** - Presenting relevant course offerings
-4. **Objection Handling** - Addressing customer concerns professionally
-5. **Closing** - Attempting to secure enrollment or next steps
-6. **Follow-up** - Scheduling demos or sending additional information
+### Key Components
+- **VoiceSalesAgent**: Core AI agent with LangGraph workflow
+- **AgentState**: Comprehensive conversation state management
+- **CustomerProfile**: Dynamic customer data collection
+- **ConversationStage**: Enum-based stage management
 
 ## 📋 Prerequisites
 
 - Python 3.8+
 - OpenAI API key
-- FastAPI
-- LangGraph
-- LangChain
+- CUDA-compatible GPU (optional, for faster TTS)
 
 ## 🛠️ Installation
 
 1. **Clone the repository**
-```bash
-git clone https://github.com/yourusername/voice-sales-agent.git
-cd voice-sales-agent
-```
+   ```bash
+   git clone https://github.com/yourusername/voice-sales-agent.git
+   cd voice-sales-agent
+   ```
 
-2. **Create virtual environment**
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3. **Install dependencies**
-```bash
-pip install -r requirements.txt
-```
+3. **Set up environment variables**
+   ```bash
+   # Create .env file
+   echo "OPENAI_API_KEY=your_openai_api_key_here" > .env
+   ```
 
-4. **Set up environment variables**
-Create a `.env` file in the root directory:
-```env
-OPENAI_API_KEY=your_openai_api_key_here
-```
+4. **Install PyTorch with CUDA support (optional)**
+   ```bash
+   # For CUDA 11.8
+   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+   ```
 
 ## 🚀 Usage
 
 ### Starting the Server
 
 ```bash
-python main.py
+python app.py
 ```
 
 The API will be available at `http://localhost:8000`
 
-### API Documentation
-
-Access the interactive API documentation at:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-## 🔌 API Endpoints
-
-### Core Sales Conversation
-
-#### `POST /start-call`
-Start a new sales call session
-```json
-{
-  "phone_number": "+1234567890",
-  "customer_name": "John Doe"
-}
-```
-
-#### `POST /respond/{call_id}`
-Send customer response and get agent reply
-```json
-{
-  "message": "I'm interested in learning AI"
-}
-```
-
-#### `GET /conversation/{call_id}`
-Retrieve full conversation history
-
-### Voice Features
-
-#### `POST /transcribe`
-Convert audio to text using OpenAI Whisper
-- Upload audio file (WAV, MP3, M4A, etc.)
-
-#### `POST /tts`
-Convert text to speech
-```json
-{
-  "text": "Hello, this is Sarah from TechEdu Academy"
-}
-```
-
-### Health Check
-
-#### `GET /health`
-Check API status and active sessions
-
-## 💼 Course Offerings
+## 🎯 Course Offerings
 
 The agent promotes two main courses:
 
 ### AI Mastery Bootcamp
 - **Duration**: 12 weeks
-- **Price**: $299 (special) / $499 (regular)
-- **Focus**: LLMs, Computer Vision, MLOps
-- **Benefits**: Job placement assistance, certification, lifetime access
+- **Price**: $299 (Special) / $499 (Regular)
+- **Target**: Professionals and experienced learners
+- **Benefits**: LLMs, Computer Vision, MLOps, Job placement assistance
 
 ### Data Science Fundamentals
 - **Duration**: 8 weeks
-- **Price**: $249 (special) / $399 (regular)
-- **Focus**: Python, SQL, Statistics, Tableau
-- **Benefits**: Real-world projects, mentor support
+- **Price**: $249 (Special) / $399 (Regular)
+- **Target**: Beginners and analysts
+- **Benefits**: Python, SQL, Statistics, Tableau
 
-## 🧠 Conversation Intelligence
+## 📊 API Endpoints
 
-### Customer Profiling
-The agent automatically builds customer profiles including:
-- Experience level (beginner, intermediate, experienced)
-- Professional role
-- Learning goals and needs
-- Timeline preferences
-- Budget and time concerns
-- Interest level and sentiment
-
-### Objection Handling
-Intelligent responses to common objections:
-- **Price concerns**: ROI emphasis, payment plans, value comparison
-- **Time concerns**: Flexible learning options, minimal time commitment
-- **Relevance concerns**: Beginner-friendly approach, job placement stats
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/start-call` | POST | Initialize new sales call session |
+| `/respond/{call_id}` | POST | Process customer message and generate response |
+| `/conversation/{call_id}` | GET | Retrieve full conversation history |
+| `/transcribe` | POST | Convert audio to text using Whisper |
+| `/tts` | POST | Convert text to speech with dual TTS support |
+| `/health` | GET | System health check and metrics |
 
 ## 🔧 Configuration
 
 ### Environment Variables
-- `OPENAI_API_KEY`: Your OpenAI API key (required)
-
-### Customizing Courses
-Modify the `COURSE_INFO` dictionary in the code to add or update course offerings:
-
-```python
-COURSE_INFO = {
-    "Your Course Name": {
-        "duration": "X weeks",
-        "regular_price": "$XXX",
-        "special_price": "$XXX",
-        "benefits": ["Benefit 1", "Benefit 2"],
-        "target_audience": ["audience1", "audience2"]
-    }
-}
+```env
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-### Sample Conversation Flow
-```
-Agent: "Hello John! This is Sarah from TechEdu Academy..."
-Customer: "Hi, I'm interested in learning AI for my career"
-Agent: "That's great! What's your current experience with AI?"
-Customer: "I'm a complete beginner"
-Agent: "Perfect! Our AI Mastery Bootcamp is designed for beginners..."
-```
-
-## 🚨 Error Handling
-
-The API includes comprehensive error handling:
-- Invalid call IDs return 404
-- Ended sessions return 400
-- API errors return 500 with detailed messages
-- Transcription/TTS errors are handled gracefully
-
-## 🔒 Security Considerations
-
-- Store API keys securely in environment variables
-- Implement rate limiting for production use
-- Add authentication for sensitive endpoints
-- Validate all user inputs
-- Use HTTPS in production
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Issues**: Report bugs via GitHub Issues
-- **Discussions**: Use GitHub Discussions for questions
-- **Documentation**: Check the `/docs` endpoint for API reference
-
-## 🔮 Future Enhancements
-
-- [ ] Multi-language support
-- [ ] Advanced analytics dashboard
-- [ ] CRM integration
-- [ ] A/B testing for conversation flows
-- [ ] Webhook support for external systems
-- [ ] Advanced voice cloning options
-- [ ] Real-time conversation monitoring
-- [ ] Performance metrics and reporting
+### Model Configuration
+- **LLM Model**: GPT-4o-mini (configurable)
+- **TTS Primary**: HuggingFace SpeechT5
+- **TTS Fallback**: OpenAI TTS (nova voice)
+- **Transcription**: OpenAI Whisper-1
 
 ## 📈 Performance
 
-- Handles concurrent sessions efficiently
-- Sub-500ms response times for most operations
-- Scalable architecture with stateless design
-- Memory-efficient conversation storage
+- **Response Time**: < 2 seconds average
+- **Concurrent Sessions**: 100+ supported
+- **TTS Generation**: ~1 second for 50 words
+- **Transcription**: ~3 seconds for 30-second audio
 
----
+## 🔒 Security Features
 
-**Built with ❤️ using FastAPI, LangGraph, and OpenAI**
+- **Environment variable** configuration for API keys
+- **CORS middleware** with configurable origins
+- **Input validation** using Pydantic models
+- **Error handling** with appropriate HTTP status codes
+- **Session isolation** with unique call IDs
+
+## 📊 Monitoring & Analytics
+
+The system provides built-in analytics:
+
+- **Active session tracking**
+- **Conversation stage monitoring**
+- **Customer profile evolution**
+- **Objection pattern analysis**
+- **Success rate metrics**
+
+Access analytics via:
+```http
+GET /health  # Basic system health
+GET /conversation/{call_id}  # Detailed conversation data
+```
+
+## 🔄 Development Workflow
+
+### Adding New Conversation Stages
+
+1. **Update the enum** in `ai_agent.py`:
+```python
+class ConversationStage(str, Enum):
+    NEW_STAGE = "new_stage"
+```
+
+2. **Add the handler method**:
+```python
+def handle_new_stage(self, state: AgentState) -> AgentState:
+    # Implementation here
+    pass
+```
+
+3. **Update the graph workflow**:
+```python
+workflow.add_node("new_stage", self.handle_new_stage)
+```
+
+### Customizing System Prompts
+
+Modify the `_get_system_prompts()` method in `VoiceSalesAgent` class to customize agent behavior for each stage.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 🙏 Acknowledgments
+
+- **OpenAI** for GPT and Whisper APIs
+- **LangChain/LangGraph** for workflow orchestration
+- **HuggingFace** for open-source TTS models
+- **FastAPI** for the high-performance web framework
+
+**Built with ❤️ OpenAI, LangGraph, HuggingFace, FastAPI  ** - Empowering careers through AI education
