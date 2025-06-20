@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice Sales Agent</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
             --primary: #667eea;
@@ -374,6 +375,155 @@
             margin-top: 10px;
             font-size: 0.9rem;
         }
+        
+        /* Markdown Styling */
+        .message-content strong {
+            font-weight: 600;
+        }
+        
+        .message-content em {
+            font-style: italic;
+        }
+        
+        .message-content ul, 
+        .message-content ol {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        .message-content li {
+            margin-bottom: 5px;
+        }
+        
+        .message-content blockquote {
+            border-left: 3px solid rgba(255,255,255,0.5);
+            padding-left: 15px;
+            margin: 10px 0;
+            font-style: italic;
+        }
+        
+        .message-content code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .message-content pre {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .message-content pre code {
+            background: transparent;
+            padding: 0;
+        }
+        
+        .message-content a {
+            color: inherit;
+            text-decoration: underline;
+            opacity: 0.9;
+        }
+        
+        /* Special styling for agent messages */
+        .message.agent .message-content h1,
+        .message.agent .message-content h2,
+        .message.agent .message-content h3 {
+            font-weight: 600;
+            margin: 15px 0 10px 0;
+            line-height: 1.3;
+        }
+        
+        .message.agent .message-content h1 {
+            font-size: 1.4rem;
+        }
+        
+        .message.agent .message-content h2 {
+            font-size: 1.3rem;
+        }
+        
+        .message.agent .message-content h3 {
+            font-size: 1.2rem;
+        }
+        
+        /* Call to action styling */
+        .message.agent .message-content .cta-button {
+            display: inline-block;
+            background: white;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 25px;
+            margin-top: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .message.agent .message-content .cta-button:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        
+        /* Highlighted text */
+        .message.agent .message-content .highlight {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        /* Feature list styling */
+        .message.agent .message-content .feature {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .message.agent .message-content .feature-icon {
+            color: #a3bffa;
+            margin-right: 10px;
+            font-size: 1.2rem;
+            min-width: 24px;
+        }
+        
+        .message.agent .message-content .feature-text {
+            flex: 1;
+        }
+        
+        /* Testimonial styling */
+        .message.agent .message-content .testimonial {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-style: italic;
+            border-left: 3px solid #a3bffa;
+        }
+        
+        .message.agent .message-content .testimonial-author {
+            text-align: right;
+            margin-top: 10px;
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        /* Promotional badge */
+        .message.agent .message-content .promo-badge {
+            display: inline-block;
+            background: #ff9800;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 5px;
+            vertical-align: super;
+        }
     </style>
 </head>
 <body>
@@ -470,6 +620,16 @@
     </div>
 
     <script>
+        // Set Marked.js options
+        marked.setOptions({
+            breaks: true,
+            headerIds: false,
+            mangle: false,
+            highlight: function(code) {
+                return '<div class="highlight">' + code + '</div>';
+            }
+        });
+        
         class VoiceSalesAgent {
             constructor() {
                 this.apiBaseUrl = 'http://localhost:8000';
@@ -664,7 +824,7 @@
                     this.showConversationInterface();
                     this.addMessage('agent', data.first_message);
                     
-                    // FIX: Play audio for the first message
+                    // Play audio for the first message
                     this.playTTS(data.first_message);
                     
                     this.updateCallStatus('Active', customerName);
@@ -770,6 +930,9 @@
                 sendBtn.disabled = true;
                 sendBtn.innerHTML = '<span class="loading"></span> Sending...';
 
+                // Show typing indicator
+                this.showTypingIndicator();
+
                 try {
                     // Add customer message to conversation
                     this.addMessage('customer', message);
@@ -789,6 +952,9 @@
 
                     const data = await response.json();
                     
+                    // Hide typing indicator
+                    this.hideTypingIndicator();
+                    
                     // Add agent response
                     this.addMessage('agent', data.reply);
 
@@ -801,6 +967,7 @@
 
                 } catch (error) {
                     console.error('Error sending message:', error);
+                    this.hideTypingIndicator();
                     this.showError('Failed to send message');
                 } finally {
                     sendBtn.disabled = false;
@@ -809,7 +976,13 @@
             }
 
             async playTTS(text) {
+                const ttsBtn = document.getElementById('getTTSBtn');
+                const originalHTML = ttsBtn.innerHTML;
+                
                 try {
+                    ttsBtn.innerHTML = '<span class="loading"></span> Generating...';
+                    ttsBtn.disabled = true;
+
                     const response = await fetch(`${this.apiBaseUrl}/tts`, {
                         method: 'POST',
                         headers: {
@@ -833,6 +1006,9 @@
                 } catch (error) {
                     console.error('Error generating TTS:', error);
                     this.showError('Failed to generate speech');
+                } finally {
+                    ttsBtn.innerHTML = originalHTML;
+                    ttsBtn.disabled = false;
                 }
             }
 
@@ -853,12 +1029,22 @@
                 const now = new Date();
                 const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+                // Parse Markdown for agent messages
+                let contentHTML;
+                if (speaker === 'agent') {
+                    // Convert Markdown to HTML for agent messages
+                    contentHTML = marked.parse(message);
+                } else {
+                    // Escape HTML for customer messages
+                    contentHTML = message.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                }
+
                 messageDiv.innerHTML = `
                     <div class="message-header">
                         <span>${speaker === 'agent' ? 'Sales Agent' : 'Customer'}</span>
                         <span>${timeString}</span>
                     </div>
-                    <div class="message-content">${message}</div>
+                    <div class="message-content">${contentHTML}</div>
                 `;
 
                 container.appendChild(messageDiv);
@@ -867,6 +1053,35 @@
                 // Update message count
                 this.messageCount++;
                 document.getElementById('totalMessages').textContent = this.messageCount;
+            }
+
+            showTypingIndicator() {
+                const container = document.getElementById('conversationContainer');
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'message agent typing-indicator';
+                typingDiv.id = 'typing-indicator';
+                
+                typingDiv.innerHTML = `
+                    <div class="message-header">
+                        <span>Sales Agent</span>
+                        <span>Typing...</span>
+                    </div>
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                `;
+
+                container.appendChild(typingDiv);
+                container.scrollTop = container.scrollHeight;
+            }
+
+            hideTypingIndicator() {
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
             }
 
             getLastAgentMessage() {
