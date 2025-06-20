@@ -1,12 +1,30 @@
+# Core FastAPI and web framework
 fastapi
 uvicorn
+python-multipart
+
+# AI and LLM dependencies
 openai
 langchain
-langgraph
-langchain_community
 langchain-openai
-pydantic
-python-multipart
-faiss-cpu
+langgraph
+langchain-core
+
+# HuggingFace TTS dependencies
+transformers
+torch
+torchaudio
+sentencepiece
+datasets
+soundfile
+scipy
 numpy
+
+# Data handling and validation
+pydantic
 python-dotenv
+typing-extensions
+
+# Additional utilities
+requests
+aiofiles
